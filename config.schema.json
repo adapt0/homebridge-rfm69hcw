@@ -1,0 +1,21 @@
+{
+    "pluginAlias": "RoofControl",
+    "pluginType": "accessory",
+    "singular": false,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "title": "Name",
+                "type": "string",
+                "required": true
+            },
+            "code": {
+                "title": "Code",
+                "type": "string",
+                "required": true,
+                "description": "Base code to transmit"
+            }
+        }
+    }
+}

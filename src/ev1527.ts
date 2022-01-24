@@ -12,12 +12,9 @@ export default class Ev1527 {
     private highPower_ = false;
     private payload_ = new Array<number>();
     private payloadLast_?: bigint;
-    private rfm69_: Rfm69;
+    private rfm69_ = new Rfm69();
+    private rxMode_ = false;
     private readonly PAYLOAD_LENGTH = 12; // 24 bits * (4 received bits per bit)
-
-    constructor() {
-        this.rfm69_ = new Rfm69();
-    }
     
     async init() {
         await this.rfm69_.init();
@@ -43,9 +40,12 @@ export default class Ev1527 {
         });
 
         await this.rfm69_.setMode(Rfm69Mode.RX);
+        this.rxMode_ = true;
     }
 
     async receive(): Promise<number | undefined> {
+        if (!this.rxMode_) await this.beginRx_();
+
         const now = process.hrtime.bigint();
         if (null != this.payloadLast_ && (now - this.payloadLast_) > 10000000000) {
             this.payloadLast_ = undefined;
@@ -84,7 +84,9 @@ export default class Ev1527 {
         }
     }
 
-    async transmit(data: number): Promise<void> {
+    private async beginTx_() {
+        this.rxMode_ = false;
+
         if (!this.highPower_) {
             this.highPower_ = true;
             await this.rfm69_.setHighPower();
@@ -96,9 +98,12 @@ export default class Ev1527 {
             payloadLength:	0,
         });
 
-        // const toSend = Buffer.alloc(this.PAYLOAD_LENGTH + 1);
-        // let toSendIdx = 0;
-        // uint8_t* p = toSend;
+        await this.rfm69_.setMode(Rfm69Mode.STANDBY);
+    }
+
+    async transmit(data: number): Promise<void> {
+        if (this.rxMode_) await this.beginTx_();
+
         const toSend = new Array<number>();
         for (let i = 24; i > 0; i -= 2) {
             toSend.push(
@@ -112,8 +117,5 @@ export default class Ev1527 {
         //
         const preamble = Buffer.from([ 0x80, 0x00, 0x00, 0x00 ]);
         await this.rfm69_.transmit(preamble, Buffer.from(toSend));
-
-        // reconfigure RX
-        await this.beginRx_();
     }
 }

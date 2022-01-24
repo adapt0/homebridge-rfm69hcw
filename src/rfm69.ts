@@ -154,6 +154,10 @@ enum IrqFlags {
 
 const SPI_WNR = 0x80;   ///< SPI Write access
 
+async function delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export default class Rfm69 {
     private spi_: SPI.SPI;
     private spiTransferInProgress_ = false;
@@ -171,8 +175,8 @@ export default class Rfm69 {
             for (let attempts = 0; attempts < 3; ++attempts) {
                 ver = await this.read8_(Registers.REG10_VERSION);
                 if (0x24 === ver) return ver;
+                await delay(1);
             }
-            rpio.msleep(1);
             return ver
         })();
         if (0x24 !== version) {
@@ -227,10 +231,10 @@ export default class Rfm69 {
                 (frf >>  0) & 0xff,
             ]);
         }
-    
+
         // data modulation
         await this.write8_(Registers.REG02_DATAMODUL, config.modulation);
-    
+
         // bit rate
         if (config.bitRate > 0) {
             const br = Math.round(FXOSC / config.bitRate);
@@ -270,7 +274,7 @@ export default class Rfm69 {
         for (;;) {
             if (await this.read8_(Registers.REG27_IRQFLAGS1) & IrqFlags.IRQFLAGS1_MODE_READY) break;
             if ((process.hrtime.bigint() - since) > 1000000000) throw new Error('Timed out waiting for setMode');
-            rpio.sleep(1);
+            await delay(1);
         }
     }
 
@@ -336,11 +340,11 @@ export default class Rfm69 {
         for (const since = process.hrtime.bigint(); ; ) {
             const irqFlags2 = await this.read8_(Registers.REG28_IRQFLAGS2);
             if (irqFlags2 & IrqFlags.IRQFLAGS2_PACKET_SENT) break;
-            if ((process.hrtime.bigint() - since) > 1000000000) break;
-            rpio.msleep(1);
+            if ((process.hrtime.bigint() - since) > 1000000000) throw new Error('Timed out waiting for transmit');
+            rpio.usleep(1);
         }
 
-        await this.setMode(Mode.RX);
+        await this.setMode(Mode.STANDBY);
     }
 
     private async read8_(reg: Registers): Promise<number> {
@@ -356,7 +360,10 @@ export default class Rfm69 {
     }
 
     private async transfer_(data: number[]): Promise<Buffer> {
-        if (this.spiTransferInProgress_) throw new Error('Transfer already in progress!');
+        if (this.spiTransferInProgress_) {
+            console.trace('Transfer already in progress!');
+            throw new Error('Transfer already in progress!');
+        }
         this.spiTransferInProgress_ = true;
 
         try {
