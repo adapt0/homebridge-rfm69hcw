@@ -6,6 +6,7 @@ RFM69HCW SPI driver
 Licensed under the MIT License. Refer to LICENSE file in the project root. */
 /////////////////////////////////////////////////////////////////////////////
 
+import { delay } from './utils';
 import Pins from './pins';
 import rpio from 'rpio';
 import SPI from 'pi-spi';
@@ -153,10 +154,6 @@ enum IrqFlags {
 };
 
 const SPI_WNR = 0x80;   ///< SPI Write access
-
-async function delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 export default class Rfm69 {
     private spi_: SPI.SPI;

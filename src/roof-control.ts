@@ -16,12 +16,17 @@ interface IToTransmit {
     onDone: () => void;
 }
 
+type LogFunc = (msg: string) => void;
+
 export default class RoofControl {
     private ev1527_ = new Ev1527();
+    private log_: LogFunc;
     private timer_?: NodeJS.Timer;
     private toTransmit_: { [id: string]: IToTransmit } = { };
 
-    constructor(private log_: (msg: string) => void) { }
+    constructor(log?: LogFunc) {
+        this.log_ = log ?? console.log;
+    }
 
     async init() {
         rpio.open(Pins.RFM69_RST, rpio.OUTPUT);
@@ -43,7 +48,7 @@ export default class RoofControl {
         }
 
         if (state) {
-            this.toTransmit_[id] = { code, times: 30, onDone };
+            this.toTransmit_[id] = { code, times: 40, onDone };
         }
     }
 
@@ -57,6 +62,8 @@ export default class RoofControl {
                     if (isFinite(entry.code) && entry.code >= 0x10) {
                         // console.log('TX', entry.code.toString(16));
                         try {
+                            // need to send twice for transmission to be picked up when multiple are being sent
+                            await this.ev1527_.transmit(entry.code);
                             await this.ev1527_.transmit(entry.code);
                         } catch (e) {
                             console.error(e);
