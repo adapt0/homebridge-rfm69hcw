@@ -8,6 +8,7 @@ Licensed under the MIT License. Refer to LICENSE file in the project root. */
 
 enum Pins {
     RFM69_RST 	= 22, // GPIO25
+    OLED_RST    = 7,  // GPIO4
     BUTTON_1  	= 29, // GPIO5
     BUTTON_2  	= 31, // GPIO6
     BUTTON_3  	= 32, // GPIO12

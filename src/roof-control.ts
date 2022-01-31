@@ -7,6 +7,7 @@ Licensed under the MIT License. Refer to LICENSE file in the project root. */
 /////////////////////////////////////////////////////////////////////////////
 
 import Ev1527 from './ev1527';
+import Oled from './oled';
 import Pins from './pins';
 import rpio from 'rpio';
 
@@ -21,6 +22,7 @@ type LogFunc = (msg: string) => void;
 export default class RoofControl {
     private ev1527_ = new Ev1527();
     private log_: LogFunc;
+    private oled_ = new Oled();
     private timer_?: NodeJS.Timer;
     private toTransmit_: { [id: string]: IToTransmit } = { };
 
@@ -29,6 +31,7 @@ export default class RoofControl {
     }
 
     async init() {
+        rpio.open(Pins.OLED_RST,  rpio.OUTPUT);
         rpio.open(Pins.RFM69_RST, rpio.OUTPUT);
         rpio.open(Pins.BUTTON_1,  rpio.INPUT);
         rpio.open(Pins.BUTTON_2,  rpio.INPUT);
@@ -36,6 +39,7 @@ export default class RoofControl {
         rpio.open(Pins.CS,        rpio.OUTPUT);
 
         await this.ev1527_.init();
+        await this.oled_.init();
 
         await this.begin_();
     }

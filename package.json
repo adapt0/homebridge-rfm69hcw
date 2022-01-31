@@ -22,7 +22,8 @@
   "dependencies": {
     "pi-spi": "^1.2.1",
     "rpi-gpio": "^2.1.7",
-    "rpio": "^2.4.2"
+    "rpio": "^2.4.2",
+    "ssd1306-i2c-js": "^1.0.5"
   },
   "devDependencies": {
     "@types/node": "^17.0.10",
@@ -30,7 +31,7 @@
     "@types/rpio": "^2.4.2",
     "homebridge": "^1.4.0",
     "rimraf": "^3.0.2",
-    "typescript": "^4.5.5",
-    "ts-node-dev": "^1.1.8"
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.5.5"
   }
 }
