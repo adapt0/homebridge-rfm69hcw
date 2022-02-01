@@ -47,7 +47,6 @@ export default class Oled {
             }
             return undefined;
         })();
-        console.log(os.hostname(), { ip4 });
 
         display.clearScreen();
         if (this.invert_) display.fillRect(0, 0, 128, 64, Color.White, Layer.Layer0);

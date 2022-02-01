@@ -44,7 +44,7 @@ export default class RoofControl {
         await this.begin_();
     }
 
-    setTransmitting(id: string, code: number, state = true, onDone: () => void): void {
+    setTransmitting(id: string, code: number, state = true, times = 40, onDone: () => void): void {
         const entry = this.toTransmit_[id];
         if (entry) {
             delete this.toTransmit_[id];
@@ -52,7 +52,7 @@ export default class RoofControl {
         }
 
         if (state) {
-            this.toTransmit_[id] = { code, times: 40, onDone };
+            this.toTransmit_[id] = { code, times, onDone };
         }
     }
 
