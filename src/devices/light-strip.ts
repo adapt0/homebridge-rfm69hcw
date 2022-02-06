@@ -6,7 +6,7 @@ Wireless light strip (unknown manufacturer)
 Licensed under the MIT License. Refer to LICENSE file in the project root. */
 /////////////////////////////////////////////////////////////////////////////
 
-import Rfm69, { Modulation as Rfm69Modulation } from './rfm69';
+import Rfm69, { Modulation as Rfm69Modulation } from '@/hw/rfm69';
 
 export default class LightStrip {
     private async setRfm69Config_(rfm69: Rfm69) {

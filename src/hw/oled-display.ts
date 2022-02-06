@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 /** @file
-OLED display
+Adafruit RFM69HCW Radio Bonnet OLED display
 
 \copyright Copyright (c) 2022 Chris Byrne. All rights reserved.
 Licensed under the MIT License. Refer to LICENSE file in the project root. */
@@ -11,7 +11,7 @@ import Pins from './pins';
 import rpio from 'rpio';
 import {display, Font, Color, Layer } from 'ssd1306-i2c-js'
 
-export default class Oled {
+export default class OledDisplay {
     private invert_ = false;
 
     async init() {
@@ -33,6 +33,10 @@ export default class Oled {
         this.drawDisplay_();
     }
 
+    /**
+     * Update display
+     * @returns {void}
+     */
     private drawDisplay_() {
         const ip4 = (() => {
             const nets = os.networkInterfaces();
@@ -56,4 +60,4 @@ export default class Oled {
 
         this.invert_ = !this.invert_;
     }
-};
+}

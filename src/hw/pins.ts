@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 /** @file
-Roof controller I/O pins
+Adafruit RFM69HCW Transceiver Radio Bonnet I/O pins
 
 \copyright Copyright (c) 2022 Chris Byrne. All rights reserved.
 Licensed under the MIT License. Refer to LICENSE file in the project root. */

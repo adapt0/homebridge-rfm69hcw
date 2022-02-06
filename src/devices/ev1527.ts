@@ -6,7 +6,7 @@ EV1527 wireless RFM69 communications
 Licensed under the MIT License. Refer to LICENSE file in the project root. */
 /////////////////////////////////////////////////////////////////////////////
 
-import Rfm69, { Mode as Rfm69Mode, Modulation as Rfm69Modulation } from './rfm69';
+import Rfm69, { Mode as Rfm69Mode, Modulation as Rfm69Modulation } from '@/hw/rfm69';
 
 export default class Ev1527 {
     // private highPower_ = false;

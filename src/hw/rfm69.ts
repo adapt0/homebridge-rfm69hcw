@@ -41,7 +41,7 @@ export enum Modulation {
     MODULATION_FSK      = 0 << 3,   ///< FSK
     MODULATION_OOK      = 1 << 3,   ///< OOK
     SHAPE_NONE          = 0 << 0,   ///< no shaping
-};
+}
 
 enum Registers {
     // common configuration
@@ -151,10 +151,13 @@ enum IrqFlags {
     IRQFLAGS2_PACKET_SENT   = 1 << 3,   ///< Set in Tx when the complete packet has been sent
     IRQFLAGS2_PAYLOAD_READY = 1 << 2,   ///< Set in Rx when the payload is ready (cleared when FIFO is empty)
     IRQFLAGS2_CRC_OK        = 1 << 1,   ///< Set in Rx when the CRC of the payload is Ok
-};
+}
 
 const SPI_WNR = 0x80;   ///< SPI Write access
 
+/**
+ * RFM69HCW wrapper
+ */
 export default class Rfm69 {
     private spi_: SPI.SPI;
     private spiTransferInProgress_ = false;
@@ -167,8 +170,13 @@ export default class Rfm69 {
         this.spi_.clockSpeed(10000000);
     }
 
+    /**
+     * initialize RFM69HCW
+     * resets chip and checks version register 
+     * @returns {void}
+     */
     async init() {
-        this.reset();
+        this.reset_();
         
         const version = await (async () => {
             let ver = -1;
@@ -185,22 +193,35 @@ export default class Rfm69 {
         }
     }
 
+    /**
+     * dump RFM69HCW registers to serial
+     * @returns {void}
+     */
     async dumpRegs(): Promise<void> {
         for (let i = 0; i < 0x4D; ++i) {
-            console.log(i.toString(16), await (await this.read8_(i as any)).toString(16));
+            console.log(i.toString(16), await (await this.read8_(i as Registers)).toString(16));
         }
     }
 
-    reset(): void {
+    /**
+     * reset RFM69HCW chip
+     * @returns {void}
+     */
+    protected reset_(): void {
         rpio.write(Pins.RFM69_RST, rpio.HIGH);
         rpio.usleep(100); // 100us
         rpio.write(Pins.RFM69_RST, rpio.LOW);
         rpio.msleep(5); // 5ms
     }
 
+    /**
+     * set general RFM69HCW configuration
+     * @param config desired configuration
+     * @returns {void}
+     */
     async setConfig(config: Config): Promise<void> {
         // skip if config hasn't changed
-        if (Object.entries(config).every(([k, v]) => v === (this.curConfig_ as any)[k])) return;
+        if (Object.entries(config).every(([k, v]) => v === this.curConfig_[k as keyof Config])) return;
         this.curConfig_ = Object.assign({}, config);
 
         await this.setMode(Mode.STANDBY);
@@ -263,7 +284,9 @@ export default class Rfm69 {
     }
 
     /**
-     * set operational mode
+     * set RFM59HCW's operational mode
+     * @param mode desired mode
+     * @returns {void}
      */
     async setMode(mode: Mode): Promise<void> {
         // cache explicit mode
@@ -287,11 +310,13 @@ export default class Rfm69 {
     }
 
     /**
-     * configure packet engine mode
+     * configure RFM69HCW's packet engine
+     * @param config desired packet engine config
+     * @returns {void}
      */
     async setPacketConfig(config: PacketConfig): Promise<void> {
         // skip if config hasn't changed
-        if (Object.entries(config).every(([k, v]) => v === (this.curPacketConfig_ as any)[k])) return;
+        if (Object.entries(config).every(([k, v]) => v === this.curPacketConfig_[k as keyof PacketConfig])) return;
         this.curPacketConfig_ = Object.assign({}, config);
 
         // packet config
@@ -315,6 +340,10 @@ export default class Rfm69 {
         }
     }
 
+    /**
+     * enable high transmission power
+     * @returns {void}
+     */
     async setHighPower(): Promise<void> {
         await this.write8_(
             Registers.REG11_PALEVEL,
@@ -326,16 +355,27 @@ export default class Rfm69 {
         );
     }
 
+    /**
+     * @returns true if packet bytes are available in FIFO
+     */
     async available(): Promise<boolean> {
         const flags = await this.read8_(Registers.REG28_IRQFLAGS2);
         return Boolean(flags & IrqFlags.IRQFLAGS2_FIFO_NOT_EMPTY);
     }
-    /// @returns next byte from FIFO
+    /**
+     * @returns next byte from FIFO
+     */
     read() : Promise<number> {
         return this.read8_(Registers.REG00_FIFO);
     }
     
-    async transmit(pre: Buffer | undefined, buf: Buffer): Promise<void> {
+    /**
+     * transmit bytes
+     * @param pre (optional) preamble to include in transmission
+     * @param buf bytes to transmit
+     * @returns {void}
+     */
+     async transmit(pre: Buffer | undefined, buf: Buffer): Promise<void> {
         await this.setMode(Mode.STANDBY);
 
         if (pre) {
@@ -359,18 +399,40 @@ export default class Rfm69 {
         await this.setMode(Mode.STANDBY);
     }
 
+    /**
+     * 8 bit register read
+     * @param reg register to read
+     * @returns register's value
+     */
     private async read8_(reg: Registers): Promise<number> {
         const res = await this.transfer_([reg, 0x00]);
         return res[1];
     }
 
-    private async write8_(reg: Registers, byte: number): Promise<void> {
+    /**
+     * 8 bit register write
+     * @param reg register to read
+     * @param byte desired new register value
+     * @returns {void}}
+     */
+     private async write8_(reg: Registers, byte: number): Promise<void> {
         await this.transfer_([SPI_WNR | reg, byte]);
     }
-    private async write16_(reg: Registers, u16: number): Promise<void> {
+    /**
+     * 16 bit register write
+     * @param reg register to read
+     * @param byte desired new register value
+     * @returns {void}}
+     */
+     private async write16_(reg: Registers, u16: number): Promise<void> {
         await this.transfer_([SPI_WNR | reg, (u16 >> 8) & 0xFF, u16 & 0xff]);
     }
 
+    /**
+     * general SPI data transfer
+     * @param data bytes to write out
+     * @returns bytes read in (in exchange for bytes written out)
+     */
     private async transfer_(data: number[]): Promise<Buffer> {
         if (this.spiTransferInProgress_) {
             console.trace('Transfer already in progress!');

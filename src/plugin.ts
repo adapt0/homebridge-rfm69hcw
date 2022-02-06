@@ -19,25 +19,25 @@ import {
     Service
 } from 'homebridge';
 import crypto from 'crypto';
-import RadioController, { RadioDevice } from './radio-controller';
+import Controller, { DeviceType } from './controller';
 
 let hap: HAP;
 
 // radio controller singleton
-const getRadioController = (() => {
-    let roofControl: RadioController | undefined;
-    let roofControlInited = false;
+const getController = (() => {
+    let controller: Controller | undefined;
+    let controllerInited = false;
 
     return function(log: Logging) {
-        if (!roofControl) {
-            roofControl = new RadioController((msg) => log.info(msg));
-            roofControl.init().then(() => {
-                roofControlInited = true;
+        if (!controller) {
+            controller = new Controller((msg) => log.info(msg));
+            controller.init().then(() => {
+                controllerInited = true;
             }).catch((e) => {
                 console.error(e);
             });
         }
-        return (roofControlInited) ? roofControl : undefined;
+        return (controllerInited) ? controller : undefined;
     };
 })();
 
@@ -49,14 +49,14 @@ export = (api: API) => {
     api.registerAccessory("RadioControl", RadioControlPlugin);
 };
 
-abstract class RadioControlDeviceBase {
+abstract class DeviceBase {
     readonly uuid: string;
 
     constructor(readonly log: Logging, readonly name: string) {
         this.uuid = crypto.randomBytes(12).toString('hex');
     }
 
-    abstract get deviceType(): RadioDevice;
+    abstract get deviceType(): DeviceType;
     abstract get services(): Service[];
 
     protected createSwitchService_(subtype: string, code: number, times = -1, onlyOn = false) {
@@ -73,10 +73,10 @@ abstract class RadioControlDeviceBase {
                 switchOn = value as boolean;
                 // this.log.info(`Switch ${this.name} ${subtype} state was set to: ` + (switchOn? "ON": "OFF"));
 
-                const radio = getRadioController(this.log);
-                if (radio) {
+                const controller = getController(this.log);
+                if (controller) {
                     if (!onlyOn || switchOn) {
-                        radio.setTransmitting(this.uuid, this.deviceType, code, switchOn, times, () => {
+                        controller.beginTransmitting(this.uuid, this.deviceType, code, switchOn, times, () => {
                             // automatically turn off if this is an only on switch
                             // e.g., louvres has separate open/close switches to trigger actions
                             if (onlyOn) {
@@ -85,7 +85,7 @@ abstract class RadioControlDeviceBase {
                             }
                         });
                     } else {
-                        radio.stopTransmitting(this.uuid);
+                        controller.stopTransmitting(this.uuid);
                     }
                 }
 
@@ -96,11 +96,11 @@ abstract class RadioControlDeviceBase {
     }
 }
 
-class RadioControlDeviceEv1527 extends RadioControlDeviceBase {
+class DeviceEv1527 extends DeviceBase {
     private readonly switchOpenService: Service;
     private readonly switchCloseService: Service;
 
-    get deviceType() { return RadioDevice.EV1527; }
+    get deviceType() { return DeviceType.EV1527; }
 
     constructor(log: Logging, config: AccessoryConfig) {
         super(log, config.name);
@@ -118,10 +118,10 @@ class RadioControlDeviceEv1527 extends RadioControlDeviceBase {
     }
 }
 
-class RadioControlDeviceLightStrip extends RadioControlDeviceBase {
+class DeviceLightStrip extends DeviceBase {
     private readonly lightService: Service;
 
-    get deviceType() { return RadioDevice.LIGHTSTRIP; }
+    get deviceType() { return DeviceType.LIGHTSTRIP; }
 
     constructor(log: Logging, config: AccessoryConfig) {
         super(log, config.name);
@@ -142,8 +142,8 @@ class RadioControlDeviceLightStrip extends RadioControlDeviceBase {
             .on(CharacteristicEventTypes.SET, (value: CharacteristicValue, callback: CharacteristicSetCallback) => {
                 switchBrightness = value as number;
 
-                const radio = getRadioController(this.log);
-                if (radio) {
+                const controller = getController(this.log);
+                if (controller) {
                     // lightbulb brightness is in 100%
                     // while the weird light strip is 9 bits with the MSB for the lower portion
                     const brightnessVal = 0x1FF * switchBrightness / 100;
@@ -152,7 +152,7 @@ class RadioControlDeviceLightStrip extends RadioControlDeviceBase {
                     if (brightnessVal < 0x100) sendCode |= 0x100;
 
                     // code 
-                    radio.setTransmitting(`${this.uuid}-brightness`, this.deviceType, sendCode, undefined, times);
+                    controller.beginTransmitting(`${this.uuid}-brightness`, this.deviceType, sendCode, undefined, times);
                 }
 
                 callback();
@@ -167,19 +167,19 @@ class RadioControlDeviceLightStrip extends RadioControlDeviceBase {
 
 
 class RadioControlPlugin implements AccessoryPlugin {
-    private device_?: RadioControlDeviceBase;
+    private device_?: DeviceBase;
 
-    constructor(log: Logging, config: AccessoryConfig, api: API) {
+    constructor(log: Logging, config: AccessoryConfig/*, api: API */) {
         // initialize singleton
-        getRadioController(log);
+        getController(log);
 
         //
         switch (String(config.deviceType).toLowerCase()) {
         case 'ev1527':
-            this.device_ = new RadioControlDeviceEv1527(log, config);
+            this.device_ = new DeviceEv1527(log, config);
             break;
         case 'lightstrip':
-            this.device_ = new RadioControlDeviceLightStrip(log, config);
+            this.device_ = new DeviceLightStrip(log, config);
             break;
         default:
             log(`Unknown device type: ${config.deviceType}`);
