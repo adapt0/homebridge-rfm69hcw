@@ -46,7 +46,7 @@ const getController = (() => {
  */
 export = (api: API) => {
     hap = api.hap;
-    api.registerAccessory("RadioControl", RadioControlPlugin);
+    api.registerAccessory("rfm69hcw", Rfm69hcwPlugin);
 };
 
 abstract class DeviceBase {
@@ -166,7 +166,7 @@ class DeviceLightStrip extends DeviceBase {
 }
 
 
-class RadioControlPlugin implements AccessoryPlugin {
+class Rfm69hcwPlugin implements AccessoryPlugin {
     private device_?: DeviceBase;
 
     constructor(log: Logging, config: AccessoryConfig/*, api: API */) {
