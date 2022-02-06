@@ -6,29 +6,58 @@ Roof control plugin
 Licensed under the MIT License. Refer to LICENSE file in the project root. */
 /////////////////////////////////////////////////////////////////////////////
 
-import Ev1527 from './ev1527';
+import os from 'os';
 import Pins from './pins';
 import rpio from 'rpio';
+// import RoofControl from './roof-control';
+import {display, Font, Color, Layer } from 'ssd1306-i2c-js'
 
 (async () => {
 
 try {
-    rpio.open(Pins.RFM69_RST, rpio.OUTPUT);
-    rpio.open(Pins.BUTTON_1,  rpio.INPUT);
-    rpio.open(Pins.BUTTON_2,  rpio.INPUT);
-    rpio.open(Pins.BUTTON_3,  rpio.INPUT);
-    rpio.open(Pins.CS,        rpio.OUTPUT);
+    rpio.open(Pins.OLED_RST, rpio.OUTPUT);
 
-    //
-    const ev1527 = new Ev1527();
-    await ev1527.init();
+    rpio.write(Pins.OLED_RST, rpio.HIGH);
+    rpio.usleep(100); // 100us
+    rpio.write(Pins.OLED_RST, rpio.LOW);
+    rpio.usleep(100); // 100us
 
-    // await ev1527.transmit(0x1234);
+    // 128 x 32
+    display.init(1, 0x3C);      // Open bus and initialize driver
+    display.setFont(Font.UbuntuMono_8ptFontInfo);
 
-    for (;;) {
-        const code = await ev1527.receive();
-        if (code) console.log(code.toString(16));
+    display.turnOn();           // Turn on display module
+    display.clearScreen();      // Clear display buffer
+    display.refresh();          // Write buffer in display registries
+
+    let invert = false;
+    function drawDisplay() {
+        const ip4 = (() => {
+            const nets = os.networkInterfaces();
+            for (const ips of Object.values(nets)) {
+                if (null == ips) continue;
+                for (const ip of ips) {
+                    if (ip.internal) continue;
+                    if ('ipv4' === ip.family.toLowerCase()) {
+                        return ip.address;
+                    }
+                }
+            }
+            return undefined;
+        })();
+        console.log(os.hostname(), { ip4 });
+
+        display.clearScreen();
+        if (invert) display.fillRect(0, 0, 128, 64, Color.White, Layer.Layer0);
+        display.drawString(0,  4, os.hostname(), 2, Color.Inverse, Layer.Layer0);
+        display.drawString(0, 40, ip4 ?? '-',    3, Color.Inverse, Layer.Layer0);
+        display.refresh();
+
+        invert = !invert;
     }
+
+    setInterval(() => drawDisplay(), 120_000);
+    drawDisplay();
 
 } catch (e) {
     console.error(e);

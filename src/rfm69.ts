@@ -158,6 +158,9 @@ const SPI_WNR = 0x80;   ///< SPI Write access
 export default class Rfm69 {
     private spi_: SPI.SPI;
     private spiTransferInProgress_ = false;
+    private curConfig_ = { } as Config;
+    private curMode_ = -1 as Mode;
+    private curPacketConfig_ = { } as PacketConfig;
 
     constructor() {
         this.spi_ = SPI.initialize('/dev/spidev0.0');
@@ -196,6 +199,10 @@ export default class Rfm69 {
     }
 
     async setConfig(config: Config): Promise<void> {
+        // skip if config hasn't changed
+        if (Object.entries(config).every(([k, v]) => v === (this.curConfig_ as any)[k])) return;
+        this.curConfig_ = Object.assign({}, config);
+
         await this.setMode(Mode.STANDBY);
 
         const FXOSC = 32000000; ///< Hz - Crystal oscillator frequency (from data sheet)
@@ -259,6 +266,10 @@ export default class Rfm69 {
      * set operational mode
      */
     async setMode(mode: Mode): Promise<void> {
+        // cache explicit mode
+        if (this.curMode_ === mode) return;
+        this.curMode_ = mode;
+
         // already in mode?
         const cur = await this.read8_(Registers.REG01_OPMODE);
         if (mode == (cur & (7 << 2))) return;
@@ -279,6 +290,10 @@ export default class Rfm69 {
      * configure packet engine mode
      */
     async setPacketConfig(config: PacketConfig): Promise<void> {
+        // skip if config hasn't changed
+        if (Object.entries(config).every(([k, v]) => v === (this.curPacketConfig_ as any)[k])) return;
+        this.curPacketConfig_ = Object.assign({}, config);
+
         // packet config
         await this.write8_(Registers.REG37_PACKETCONFIG1, config.packetConfig);
 
@@ -286,7 +301,7 @@ export default class Rfm69 {
         await this.write8_(Registers.REG38_PAYLOADLENGTH, config.payloadLength);
 
         // preamble
-        await this.write8_(Registers.REG2C_PREAMBLEMSB, config.preambleSize);
+        await this.write16_(Registers.REG2C_PREAMBLEMSB, config.preambleSize);
 
         // sync word
         if (null != config.syncWord) {

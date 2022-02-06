@@ -1,5 +1,5 @@
 {
-    "pluginAlias": "RoofControl",
+    "pluginAlias": "RadioControl",
     "pluginType": "accessory",
     "singular": false,
     "schema": {
@@ -8,6 +8,15 @@
             "name": {
                 "title": "Name",
                 "type": "string",
+                "required": true
+            },
+            "deviceType": {
+                "title": "Device type",
+                "type": "string",
+                "oneOf": [
+                    { "title": "RoofControl (EV1527)", "enum": ["ev1527"] },
+                    { "title": "Lightstrip", "enum": ["lightstrip"] }
+                ],
                 "required": true
             },
             "code": {
