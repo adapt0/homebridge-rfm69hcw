@@ -1,6 +1,46 @@
 # RFM69HCW Homebridge Plugin
 
-# Local development
+<img src="./doc/homebridge-pi3.jpg" width="320" />
+
+A [Homebridge](https://homebridge.io/) plugin for Adafruit's Raspberry Pi [RFM69HCW Transceiver Radio Bonnet](https://www.adafruit.com/product/4073).
+
+## Prerequisites
+
+1. Raspberry Pi (deployed on a 3, 4+ should work?)
+2. Adafruit's Raspberry Pi [RFM69HCW Transceiver Radio Bonnet](https://www.adafruit.com/product/4073)
+
+## Installing
+
+1. Search plugins for `homebridge-rfm69hcw` and install
+2. Add accessories
+   1. Fill in name
+   2. Select device type
+   3. Enter in transmission code (see determining codes)
+   4. Optionally set transmission times
+3. Restart Homebridge
+
+Transmission time is how long the "button" is being held down for. In the case of louvres this defaults to 40, which is ~4 seconds. Depending on your configuration you may want this to be longer/shorter. Ideally it should be set so that from close the louvers completely open.
+
+## Supported devices
+
+* Roof louvres at 433MHz based on the EV1527 chip
+* Lighting strip from an unknown manufacturer
+
+### EV1527 Louvres
+
+Exposed as two switches:
+
+<img src="./doc/homekit-louvres.jpg" width="200" />
+
+Enabling a switch will continually transmit that action for the configured number of times. Once the configured times has been hit, this plugin will revert the state of the switch back to off. Can also interrupt a transmission by either toggling that action back to off, or toggling of the alternative action. For instance turning on open will begin opening the louvres, and the manually turn open to off will stop the transmission before the regular timeout.
+
+### Lightstrip
+
+Exposed as a lightbulb. Hold on the button to access the dimming control.
+
+## Development
+
+### Local development
 
 ```sh
 git clone ...
@@ -9,7 +49,7 @@ sudo npm link
 npm run build && homebridge -D
 ```
 
-# Determining codes
+### Determining codes
 
 Stop homebridge
 
