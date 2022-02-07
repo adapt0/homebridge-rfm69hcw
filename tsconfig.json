@@ -8,10 +8,6 @@
       "ES2017",
       "ES2018"
     ],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-    },
     "sourceMap": true,
     "rootDir": "src",
     "outDir": "dist",

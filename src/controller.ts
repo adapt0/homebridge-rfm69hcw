@@ -8,11 +8,11 @@ Intended to be a singleton instance to proxy access to the underlying hardware
 Licensed under the MIT License. Refer to LICENSE file in the project root. */
 /////////////////////////////////////////////////////////////////////////////
 
-import Ev1527 from '@/devices/ev1527';
-import LightStrip from '@/devices/light-strip';
-import OledDisplay from '@/hw/oled-display';
-import Pins from '@/hw/pins';
-import Rfm69, { Mode as Rfm69Mode } from '@/hw/rfm69';
+import Ev1527 from './devices/ev1527';
+import LightStrip from './devices/light-strip';
+import OledDisplay from './hw/oled-display';
+import Pins from './hw/pins';
+import Rfm69, { Mode as Rfm69Mode } from './hw/rfm69';
 import rpio from 'rpio';
 
 export enum DeviceType {

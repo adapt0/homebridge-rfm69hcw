@@ -7,10 +7,10 @@ Licensed under the MIT License. Refer to LICENSE file in the project root. */
 /////////////////////////////////////////////////////////////////////////////
 
 import readline from 'readline';
-import Rfm69 from '@/hw/rfm69';
-import { DeviceType } from '@/controller';
-import Ev1527 from '@/devices/ev1527';
-import LightStrip from '@/devices/light-strip';
+import Rfm69 from '../hw/rfm69';
+import { DeviceType } from '../controller';
+import Ev1527 from '../devices/ev1527';
+import LightStrip from '../devices/light-strip';
 
 (async () => {
     const rfm69 = new Rfm69();

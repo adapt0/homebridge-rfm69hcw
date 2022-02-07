@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 /** @file
-Roof control plugin
+RFM69HCW control plugin
 
 \copyright Copyright (c) 2022 Chris Byrne. All rights reserved.
 Licensed under the MIT License. Refer to LICENSE file in the project root. */
