@@ -137,7 +137,7 @@ enum Registers {
     REG5A_TESTPA1       = 0x5A,
     REG5C_TESTPA2       = 0x5C,
     REG6F_TESTDAGC      = 0x6F,
-    REG71_TESTAFC       = 0x71,	
+    REG71_TESTAFC       = 0x71,
 }
 
 /// IRQ flags
@@ -174,7 +174,7 @@ export default class Rfm69 {
 
     /**
      * initialize RFM69HCW
-     * resets chip and checks version register 
+     * resets chip and checks version register
      * @returns {void}
      */
     async init() {
@@ -189,11 +189,12 @@ export default class Rfm69 {
                 if (0x24 === ver) return ver;
                 await delay(1);
             }
-            return ver
+            return ver;
         })();
         if (0x24 !== version) {
+            // eslint-disable-next-line no-console
             console.error(`Failed to initialize RFM69 (unexpected version ${version})`);
-            throw new Error('Failed to initialize RFM69')
+            throw new Error('Failed to initialize RFM69');
         }
     }
 
@@ -203,6 +204,7 @@ export default class Rfm69 {
      */
     async dumpRegs(): Promise<void> {
         for (let i = 0; i < 0x4D; ++i) {
+            // eslint-disable-next-line no-console
             console.log(i.toString(16), await (await this.read8_(i as Registers)).toString(16));
         }
     }
@@ -278,7 +280,7 @@ export default class Rfm69 {
             // RxBw settings
             {
                 const rxbw = calcRxBw(Math.max(config.freqDev, 2 * config.bitRate), config.modulation);
-                if (null == rxbw) throw new Error('RxBw out of range');
+                if (!rxbw) throw new Error('RxBw out of range');
 
                 const dccFreq = 4; // fc in % of rxBW (default)
                 await this.write8_(Registers.REG19_RXBW,  (dccFreq << 5) | (rxbw.mant << 3) | (rxbw.exp << 0));
@@ -299,7 +301,7 @@ export default class Rfm69 {
 
         // already in mode?
         const cur = await this.read8_(Registers.REG01_OPMODE);
-        if (mode == (cur & (7 << 2))) return;
+        if (mode === (cur & (7 << 2))) return;
 
         // set new mode
         await this.write8_(Registers.REG01_OPMODE, mode);
@@ -333,7 +335,7 @@ export default class Rfm69 {
         await this.write16_(Registers.REG2C_PREAMBLEMSB, config.preambleSize);
 
         // sync word
-        if (null != config.syncWord) {
+        if (config.syncWord) {
             const syncWordSize = Math.min(config.syncWord.length, 8);
             await this.write8_(Registers.REG2E_SYNCCONFIG, 0x80 | ((syncWordSize - 1) << 3));
             for (let i = 0; i < syncWordSize; ++i) {
@@ -366,13 +368,14 @@ export default class Rfm69 {
         const flags = await this.read8_(Registers.REG28_IRQFLAGS2);
         return Boolean(flags & IrqFlags.IRQFLAGS2_FIFO_NOT_EMPTY);
     }
+
     /**
      * @returns next byte from FIFO
      */
     read() : Promise<number> {
         return this.read8_(Registers.REG00_FIFO);
     }
-    
+
     /**
      * transmit bytes
      * @param pre (optional) preamble to include in transmission
@@ -422,6 +425,7 @@ export default class Rfm69 {
      private async write8_(reg: Registers, byte: number): Promise<void> {
         await this.transfer_([SPI_WNR | reg, byte]);
     }
+
     /**
      * 16 bit register write
      * @param reg register to read
@@ -439,6 +443,7 @@ export default class Rfm69 {
      */
     private async transfer_(data: number[]): Promise<Buffer> {
         if (this.spiTransferInProgress_) {
+            // eslint-disable-next-line no-console
             console.trace('Transfer already in progress!');
             throw new Error('Transfer already in progress!');
         }

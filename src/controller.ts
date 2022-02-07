@@ -44,6 +44,7 @@ export default class Controller {
     private toTransmit_: { [id: string]: IToTransmit } = { };
 
     constructor(log?: LogFunc) {
+        // eslint-disable-next-line no-console
         this.log_ = log ?? console.log;
     }
 
@@ -81,6 +82,7 @@ export default class Controller {
         // begin transmitting if we aren't already running
         if (null == this.timer_) this.pollTransmit_();
     }
+
     /**
      * stop a scheduled transmission
      * @param id UUID associated with transmission
@@ -112,16 +114,17 @@ export default class Controller {
                 if (isFinite(entry.code) && entry.code >= 0x10) {
                     // console.log('TX', entry.code.toString(16), entry.state);
                     try {
-                        if (DeviceType.EV1527 == entry.deviceType) {
+                        if (DeviceType.EV1527 === entry.deviceType) {
                             // need to send twice for transmission to be picked up when multiple are being sent
                             await this.ev1527_.transmit(this.rfm69_, entry.code);
                             await this.ev1527_.transmit(this.rfm69_, entry.code);
-                        } else if (DeviceType.LIGHTSTRIP == entry.deviceType) {
+                        } else if (DeviceType.LIGHTSTRIP === entry.deviceType) {
                             await this.lightStrip_.transmit(this.rfm69_, entry.code, entry.state);
                         } else {
                             this.log_(`Unknown device type ${entry.deviceType}`);
                         }
                     } catch (e) {
+                        // eslint-disable-next-line no-console
                         console.error(e);
                     }
                 }

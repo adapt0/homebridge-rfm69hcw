@@ -29,7 +29,7 @@ export default class Ev1527 {
             freqHz:  433920000, // Hz
             freqDev: 50000, // Hz
             bitRate: 2700, // bps
-            modulation: Rfm69Modulation.MODE_PACKET | Rfm69Modulation.MODULATION_OOK | Rfm69Modulation.SHAPE_NONE
+            modulation: Rfm69Modulation.MODE_PACKET | Rfm69Modulation.MODULATION_OOK | Rfm69Modulation.SHAPE_NONE,
         });
         await rfm69.setPacketConfig({
             packetConfig:	0x00, // fixed length, no decoding, no crc, no addressing);
@@ -68,7 +68,7 @@ export default class Ev1527 {
                 if (payload.length < this.PAYLOAD_LENGTH) {
                     const b = await rfm69.read();
                     // console.log(b.toString(16));
-                    if (0 === b && 0 == payload.length) continue;
+                    if (0 === b && 0 === payload.length) continue;
                     payload.push(b);
                     payloadLast = now;
                 }
@@ -79,17 +79,18 @@ export default class Ev1527 {
                 for (const p of payload) {
                     const hi = (p >> 4);
                     const lo = (p & 0x0F);
-                    if ((hi != 0x8 && hi != 0xE) || (lo != 0x8 && lo != 0xE)) {
+                    if ((hi !== 0x8 && hi !== 0xE) || (lo !== 0x8 && lo !== 0xE)) {
                         // bad decode (expected 1110 and 1000 only)
                         payload = [];
                         break;
                     }
 
-                    val = (val << 1) | ((0x0E == hi) ? 1 : 0);
-                    val = (val << 1) | ((0x0E == lo) ? 1 : 0);
+                    val = (val << 1) | ((0x0E === hi) ? 1 : 0);
+                    val = (val << 1) | ((0x0E === lo) ? 1 : 0);
                 }
 
                 if (payload.length) {
+                    // eslint-disable-next-line no-console
                     console.log(`PACKET: ${Buffer.from(payload).toString('hex')} -> ${val.toString(16)}`);
                     payload = [];
                 }

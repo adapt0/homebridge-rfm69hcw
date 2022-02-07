@@ -5,6 +5,7 @@ Standalone development
 \copyright Copyright (c) 2022 Chris Byrne. All rights reserved.
 Licensed under the MIT License. Refer to LICENSE file in the project root. */
 /////////////////////////////////////////////////////////////////////////////
+/* eslint-disable no-console */
 
 import readline from 'readline';
 import Rfm69 from '../hw/rfm69';
@@ -29,7 +30,7 @@ import LightStrip from '../devices/light-strip';
         for (;;) {
             const answer: string = await new Promise((resolve) => rl.question('Device type? ', resolve));
             deviceType = parseInt(answer, 10) as DeviceType;
-            if (null != DeviceType[deviceType]) break;
+            if (DeviceType[deviceType]) break;
         }
 
         //
@@ -47,7 +48,7 @@ import LightStrip from '../devices/light-strip';
             const lightstrip = new LightStrip();
             await lightstrip.debugReceivePackets(rfm69);
             break;
-        }    
+        }
         default:
             break;
         }

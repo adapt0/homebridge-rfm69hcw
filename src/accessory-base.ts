@@ -31,7 +31,7 @@ export const getController = (() => {
             controller.init().then(() => {
                 controllerInited = true;
             }).catch((e) => {
-                console.error(e);
+                log(e);
             });
         }
         return (controllerInited) ? controller : undefined;
@@ -55,10 +55,19 @@ export default abstract class AccessoryBase {
     abstract get deviceType(): DeviceType;
     abstract get services(): Service[];
 
+    /**
+     * create a new switch service
+     * @param subtype service's subtype
+     * @param code transmission code
+     * @param times number of times to transmit code
+     * @param onlyOn only transmit while switch is on (level vs edge)
+     * @returns created service
+     */
     protected createSwitchService_(subtype: string, code: number, times = -1, onlyOn = false) {
         const service = new this.hap_.Service.Switch(subtype, subtype);
         return this.setSwitchOnCharacteristic_(service, code, times, onlyOn);
     }
+
     protected setSwitchOnCharacteristic_(service: Service, code: number, times = -1, onlyOn = false) {
         let switchOn = false;
         service.getCharacteristic(this.hap_.Characteristic.On)

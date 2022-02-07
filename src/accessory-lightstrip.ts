@@ -52,7 +52,7 @@ export default class AccessoryLightStrip extends AccessoryBase {
                     sendCode += brightnessVal & 0xFF;
                     if (brightnessVal < 0x100) sendCode |= 0x100;
 
-                    // code 
+                    // code
                     controller.beginTransmitting(`${this.uuid}-brightness`, this.deviceType, sendCode, undefined, times);
                 }
 

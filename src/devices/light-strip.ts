@@ -23,7 +23,7 @@ export default class LightStrip {
             freqHz:  433920000, // Hz
             freqDev: 50000, // Hz
             bitRate: 3700, // bps
-            modulation: Rfm69Modulation.MODE_PACKET | Rfm69Modulation.MODULATION_OOK | Rfm69Modulation.SHAPE_NONE
+            modulation: Rfm69Modulation.MODE_PACKET | Rfm69Modulation.MODULATION_OOK | Rfm69Modulation.SHAPE_NONE,
         });
         await rfm69.setPacketConfig({
             packetConfig:	0x00, // fixed length, no decoding, no crc, no addressing);
@@ -53,7 +53,7 @@ export default class LightStrip {
         let payloadLast: bigint | undefined;
         for (;;) {
             const now = process.hrtime.bigint();
-            if (null != payloadLast && (now - payloadLast) > 10000000000) {
+            if (payloadLast && (now - payloadLast) > 10000000000) {
                 payloadLast = undefined;
                 payload = []; // time out
             }
@@ -62,30 +62,31 @@ export default class LightStrip {
                 if (payload.length < this.PAYLOAD_LENGTH) {
                     const b = await rfm69.read();
                     // console.log(b.toString(16));
-                    if (0 === b && 0 == payload.length) continue;
+                    if (0 === b && 0 === payload.length) continue;
                     payload.push(b);
                     payloadLast = now;
                 }
                 if (payload.length !== this.PAYLOAD_LENGTH) continue;
 
-                console.log(Buffer.from(payload).toString('hex'));
+                // console.log(Buffer.from(payload).toString('hex'));
 
                 //
                 let val = 0;
                 for (const p of payload) {
                     const hi = (p >> 4);
                     const lo = (p & 0x0F);
-                    if ((hi != 0x4 && hi != 0x7) || (lo != 0 && lo != 0x4 && lo != 0x7)) {
+                    if ((hi !== 0x4 && hi !== 0x7) || (lo !== 0 && lo !== 0x4 && lo !== 0x7)) {
                         // bad decode (expected 0100 and 0111 only)
                         payload = [];
                         break;
                     }
 
-                    val = (val << 1) | ((0x07 == hi) ? 1 : 0);
-                    if (lo > 0) val = (val << 1) | ((0x07 == lo) ? 1 : 0);
+                    val = (val << 1) | ((0x07 === hi) ? 1 : 0);
+                    if (lo > 0) val = (val << 1) | ((0x07 === lo) ? 1 : 0);
                 }
 
                 if (payload.length) {
+                    // eslint-disable-next-line no-console
                     console.log(`PACKET: ${Buffer.from(payload).toString('hex')} -> ${val.toString(16)}`);
                     payload = [];
                 }

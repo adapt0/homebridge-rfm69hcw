@@ -25,7 +25,7 @@ let hap: HAP;
  */
 export = (api: API) => {
     hap = api.hap;
-    api.registerAccessory("rfm69hcw", Rfm69hcwPlugin);
+    api.registerAccessory('rfm69hcw', Rfm69hcwPlugin);
 };
 
 /**

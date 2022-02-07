@@ -9,7 +9,7 @@ Licensed under the MIT License. Refer to LICENSE file in the project root. */
 import os from 'os';
 import Pins from './pins';
 import rpio from 'rpio';
-import {display, Font, Color, Layer } from 'ssd1306-i2c-js'
+import {display, Font, Color, Layer } from 'ssd1306-i2c-js';
 
 export default class OledDisplay {
     private invert_ = false;
@@ -41,10 +41,9 @@ export default class OledDisplay {
         const ip4 = (() => {
             const nets = os.networkInterfaces();
             for (const ips of Object.values(nets)) {
-                if (null == ips) continue;
+                if (!ips) continue;
                 for (const ip of ips) {
-                    if (ip.internal) continue;
-                    if ('ipv4' === ip.family.toLowerCase()) {
+                    if (ip.internal && 'ipv4' === ip.family.toLowerCase()) {
                         return ip.address;
                     }
                 }
