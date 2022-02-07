@@ -53,11 +53,9 @@ export default class Controller {
      */
     async init() {
         rpio.open(Pins.OLED_RST,  rpio.OUTPUT);
-        rpio.open(Pins.RFM69_RST, rpio.OUTPUT);
         rpio.open(Pins.BUTTON_1,  rpio.INPUT);
         rpio.open(Pins.BUTTON_2,  rpio.INPUT);
         rpio.open(Pins.BUTTON_3,  rpio.INPUT);
-        rpio.open(Pins.CS,        rpio.OUTPUT);
 
         await this.rfm69_.init();
         await this.rfm69_.setHighPower();

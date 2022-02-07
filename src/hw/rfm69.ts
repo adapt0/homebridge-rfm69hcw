@@ -176,8 +176,10 @@ export default class Rfm69 {
      * @returns {void}
      */
     async init() {
+        rpio.open(Pins.RFM69_RST, rpio.OUTPUT);
+        rpio.open(Pins.CS,        rpio.OUTPUT);
         this.reset_();
-        
+
         const version = await (async () => {
             let ver = -1;
             for (let attempts = 0; attempts < 3; ++attempts) {
