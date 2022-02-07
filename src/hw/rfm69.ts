@@ -40,6 +40,8 @@ export enum Modulation {
     MODE_CONT_NO_BIT    = 3 << 5,   ///< Continuous mode without bit synchronizer
     MODULATION_FSK      = 0 << 3,   ///< FSK
     MODULATION_OOK      = 1 << 3,   ///< OOK
+    SHAPE_BR2           = 2 << 1,   ///< filtering with fcutoff = 2 * BR
+    SHAPE_BR            = 1 << 1,   ///< filtering with fcutoff = BR
     SHAPE_NONE          = 0 << 0,   ///< no shaping
 }
 

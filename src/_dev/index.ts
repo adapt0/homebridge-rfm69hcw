@@ -10,6 +10,7 @@ import readline from 'readline';
 import Rfm69 from '@/hw/rfm69';
 import { DeviceType } from '@/controller';
 import Ev1527 from '@/devices/ev1527';
+import LightStrip from '@/devices/light-strip';
 
 (async () => {
     const rfm69 = new Rfm69();
@@ -35,10 +36,18 @@ import Ev1527 from '@/devices/ev1527';
         switch (deviceType) {
         case DeviceType.EV1527:
         {
+            console.log('Listening for Ev1527 packets');
             const ev1527 = new Ev1527();
             await ev1527.debugReceivePackets(rfm69);
             break;
         }
+        case DeviceType.LIGHTSTRIP:
+        {
+            console.log('Listening for lightstrip packets');
+            const lightstrip = new LightStrip();
+            await lightstrip.debugReceivePackets(rfm69);
+            break;
+        }    
         default:
             break;
         }
