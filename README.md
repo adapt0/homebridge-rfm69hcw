@@ -1,8 +1,12 @@
 # RFM69HCW Homebridge Plugin
 
-<img src="./doc/homebridge-pi3.jpg" width="320" />
+|||
+|-|-|
+|<img src="./doc/louvres.jpg" width="320" />|<img src="./doc/homebridge-pi3.jpg" width="320" />|
 
 A [Homebridge](https://homebridge.io/) plugin for Adafruit's Raspberry Pi [RFM69HCW Transceiver Radio Bonnet](https://www.adafruit.com/product/4073).
+
+Enabling HomeKit control of 433MHz devices such as Louvres and outside lighting.
 
 ## Prerequisites
 
