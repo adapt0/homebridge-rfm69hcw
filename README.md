@@ -40,13 +40,27 @@ Exposed as a lightbulb. Hold on the button to access the dimming control.
 
 ## Development
 
-### Local development
+### Close this repo
 
 ```sh
 git clone ...
-cd ...
-sudo npm link
-npm run build && homebridge -D
+cd homebridge-rfm69hcw
+```
+
+### Local width homebridge development
+
+```sh
+# run from cloned repo
+# this will monitor for changes and start homebridge in dev mode
+npm run watch
+```
+
+### Local standalone development
+
+```sh
+# run from cloned repo
+# this will run src/_dev/index.ts which allows for direct instantiation of modules
+npm start
 ```
 
 ### Determining codes

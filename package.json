@@ -16,7 +16,7 @@
     "clean": "rimraf ./dist",
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build",
-    "postpublish": "npm run clean",
+    "watch": "npm run build && npm link && nodemon",
     "start": "ts-node-dev --respawn --transpile-only src/_dev/index.ts",
     "lint": "eslint src/* --max-warnings=0"
   },
@@ -43,6 +43,7 @@
     "@typescript-eslint/parser": "^5.10.2",
     "eslint": "^8.8.0",
     "homebridge": "^1.4.0",
+    "nodemon": "^2.0.15",
     "rimraf": "^3.0.2",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.5.5"
