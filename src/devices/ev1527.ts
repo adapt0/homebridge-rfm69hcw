@@ -107,7 +107,7 @@ export default class Ev1527 {
     async transmit(rfm69: Rfm69, code: number): Promise<void> {
         await this.setRfm69Config_(rfm69);
 
-        // we are 4X oversampled with our packts
+        // we are 4X over sampled with our packets
         // so one nibble = 1 bit
         // 1 - 0xE is 1110 (long pulse)
         // 0 - 0x8 is 1000 (short pulse)
@@ -121,9 +121,9 @@ export default class Ev1527 {
         // trailing bit
         toSend.push(0x80);
 
-        // we have a preamble of a short pulse follow by nothing
-        // which seems to help with more reliable transmissions
-        const preamble = Buffer.from([ 0x80, 0x00, 0x00, 0x00 ]);
+        // we have a preamble to help with more reliable transmissions
+        const preamble = Buffer.from([ 0x00, 0x00, 0x00, 0x00 ]);
+        await rfm69.transmit(preamble, Buffer.from(toSend));
         await rfm69.transmit(preamble, Buffer.from(toSend));
     }
 }

@@ -115,8 +115,6 @@ export default class Controller {
                     // console.log('TX', entry.code.toString(16), entry.state);
                     try {
                         if (DeviceType.EV1527 === entry.deviceType) {
-                            // need to send twice for transmission to be picked up when multiple are being sent
-                            await this.ev1527_.transmit(this.rfm69_, entry.code);
                             await this.ev1527_.transmit(this.rfm69_, entry.code);
                         } else if (DeviceType.LIGHTSTRIP === entry.deviceType) {
                             await this.lightStrip_.transmit(this.rfm69_, entry.code, entry.state);
